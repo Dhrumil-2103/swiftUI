@@ -1,0 +1,77 @@
+// Range Slider in Ascending order like 0 to 100
+
+import SwiftUI
+
+struct SliderAscendingorder: View {
+    @Binding var value: Int
+    let bounds: ClosedRange<Int>
+    
+    @State private var viewSize = CGSize(width: 0, height: 0)
+    
+    @State private var thumbX: CGFloat = 11
+    
+    var body: some View {
+        let pixelsPerStep = (viewSize.width - 22) / CGFloat(bounds.count - 1)
+        let offset = -bounds.lowerBound
+        
+        ZStack {
+            // Size
+            GeometryReader { geo in
+                Color.clear
+                    .onAppear {
+                        viewSize = geo.size
+                        // Set initial thumb position
+                        thumbX = CGFloat(value + offset) * pixelsPerStep + 11
+                    }
+            }
+            
+            // Line
+            Rectangle()
+                .foregroundColor(.cyan)
+                .frame(width: viewSize.width, height: 6)
+                .cornerRadius(4)
+            
+            // Thumb
+            Circle()
+                .foregroundColor(Color(red: 0.5, green: 0.1, blue: 0.15))
+                .frame(width: 22, height: 22)
+                .position(x: thumbX, y: viewSize.height / 2)
+                .gesture(DragGesture()
+                    .onChanged({ drag in
+                        var location = Int(round((drag.location.x - 11) / pixelsPerStep)) - offset
+                        location = min(bounds.upperBound, max(bounds.lowerBound, location))
+                        
+                        value = location
+                        thumbX = CGFloat(value + offset) * pixelsPerStep + 11
+                    })
+                )
+                .onChange(of: pixelsPerStep) { pix in
+                    // Update thumb position if necessary
+                    thumbX = CGFloat(value + offset) * pix + 11
+                }
+                .overlay {
+                    Text("\(value)")
+                        .font(.system(size: 12, weight: .bold))
+                        .padding(8)
+                        .background(Color.black.opacity(0.5))
+                        .cornerRadius(4)
+                        .position(x: thumbX, y: viewSize.height / 2 - 28)
+                }
+        }
+    }
+}
+
+struct SingleThumbSliderDemo1: View {
+    @State private var sliderValue = 50
+    
+    var body: some View {
+        SliderAscendingorder(value: $sliderValue, bounds: 0...100)
+            .padding()
+    }
+}
+
+struct SingleThumbSlider_Previews1: PreviewProvider {
+    static var previews: some View {
+        SingleThumbSliderDemo1()
+    }
+}
