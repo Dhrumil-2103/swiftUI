@@ -1,0 +1,90 @@
+// SliderView with lable in descending order like 100 to 0
+
+import SwiftUI
+
+struct SliderView: View {
+    @State var value: Int
+    let bounds: ClosedRange<Int>
+    
+    @State private var viewSize = CGSize(width: 0, height: 0)
+    
+    @State private var thumbX: CGFloat = 11
+    
+    var body: some View {
+        let pixelsPerStep = (viewSize.width - 22) / CGFloat(bounds.count - 1)
+//        let offset = bounds.upperBound
+        
+        ZStack {
+            // Size
+            GeometryReader { geo in
+                Color.clear
+                    .onAppear {
+                        viewSize = geo.size
+                        // Set initial thumb position
+                        thumbX = CGFloat(bounds.upperBound - value) * pixelsPerStep + 11
+                    }
+            }
+            
+            // Line
+            Rectangle()
+                .foregroundColor(Color("E9F5FE"))
+                .frame(width: viewSize.width, height: 6)
+                .cornerRadius(4)
+            
+            // Thumb
+           Image("ic_thumb")
+                .foregroundColor(Color(red: 0.5, green: 0.1, blue: 0.15))
+                .frame(width: 22, height: 22)
+                .position(x: thumbX, y: viewSize.height / 2)
+                .gesture(DragGesture()
+                    .onChanged({ drag in
+                        var location = bounds.upperBound - Int(round((drag.location.x - 11) / pixelsPerStep))
+                        location = min(bounds.upperBound, max(bounds.lowerBound, location))
+                        
+                        value = location
+                        thumbX = CGFloat(bounds.upperBound - value) * pixelsPerStep + 11
+                    })
+                )
+                .onChange(of: pixelsPerStep) { pix in
+                    // Update thumb position if necessary
+                    thumbX = CGFloat(bounds.upperBound - value) * pix + 11
+                }
+                .overlay {
+                    ZStack {
+                        Image("ic_slider_arrow").renderingMode(.template)
+                            .foregroundColor(Color("E9F5FE"))
+                        ZStack {
+                            Text("\(value) \(Text("Days_left"))")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(Color("7E7E7E"))
+                                .padding(.horizontal, 10)
+                                .environment(\.locale, Locale(identifier: Language))
+                        }
+                        .frame(height: 30)
+                        .frame(minWidth: 80)
+                        .background(Color("E9F5FE"))
+                        .cornerRadius(10)
+                        .padding(.bottom, 24)
+                    }.position(x: thumbX, y: viewSize.height / 2 - 28)
+                    
+                }
+        }
+    }
+}
+
+struct SingleThumbSliderDemo: View {
+    @State private var sliderValue = 50
+    @State private var maxValue = 150
+    
+    var body: some View {
+        SliderView(value: sliderValue, bounds: 0...maxValue)
+            .padding()
+    }
+}
+
+struct SingleThumbSlider_Previews: PreviewProvider {
+    static var previews: some View {
+        SingleThumbSliderDemo()
+            .padding(.horizontal)
+    }
+}
