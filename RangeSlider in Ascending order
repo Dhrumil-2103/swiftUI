@@ -1,8 +1,6 @@
-// Range Slider in Ascending order like 0 to 100
-
 import SwiftUI
 
-struct SliderAscendingorder: View {
+struct SliderView: View {
     @Binding var value: Int
     let bounds: ClosedRange<Int>
     
@@ -61,17 +59,17 @@ struct SliderAscendingorder: View {
     }
 }
 
-struct SingleThumbSliderDemo1: View {
+struct SingleThumbSliderDemo: View {
     @State private var sliderValue = 50
     
     var body: some View {
-        SliderAscendingorder(value: $sliderValue, bounds: 0...100)
+        SliderView(value: $sliderValue, bounds: 0...100)
             .padding()
     }
 }
 
-struct SingleThumbSlider_Previews1: PreviewProvider {
+struct SingleThumbSlider_Previews: PreviewProvider {
     static var previews: some View {
-        SingleThumbSliderDemo1()
+        SingleThumbSliderDemo()
     }
 }
