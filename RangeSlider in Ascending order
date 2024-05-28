@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct SliderView: View {
+struct SliderAscendingorder: View {
     @Binding var value: Int
     let bounds: ClosedRange<Int>
     
@@ -43,7 +43,7 @@ struct SliderView: View {
                         thumbX = CGFloat(value + offset) * pixelsPerStep + 11
                     })
                 )
-                .onChange(of: pixelsPerStep) { pix in
+                .onChange(of: pixelsPerStep) { oldPix, pix in
                     // Update thumb position if necessary
                     thumbX = CGFloat(value + offset) * pix + 11
                 }
@@ -59,17 +59,17 @@ struct SliderView: View {
     }
 }
 
-struct SingleThumbSliderDemo: View {
+struct SingleThumbSliderDemo1: View {
     @State private var sliderValue = 50
     
     var body: some View {
-        SliderView(value: $sliderValue, bounds: 0...100)
+        SliderAscendingorder(value: $sliderValue, bounds: 0...100)
             .padding()
     }
 }
 
-struct SingleThumbSlider_Previews: PreviewProvider {
+struct SingleThumbSlider_Previews1: PreviewProvider {
     static var previews: some View {
-        SingleThumbSliderDemo()
+        SingleThumbSliderDemo1()
     }
 }
