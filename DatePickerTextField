@@ -1,0 +1,106 @@
+import Foundation
+import SwiftUI
+
+struct DatePickerTextField: UIViewRepresentable {
+    
+    private let txtField = UITextField()
+    private let datePicker = UIDatePicker()
+    private let helper = Helper()
+    
+    private let dateFormatter: DateFormatter = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd MMM yyyy"
+        return dateFormatter
+    }()
+    
+    public var placeholder: String
+    var isActive: Bool = false
+    @Binding public var date: Date?
+    var isMaxDateToday: Bool = false
+    var isMinDateToday: Bool = false
+    var setMaxDate: Date?
+    var setMinDate: Date?
+    
+    func makeUIView(context: Context) -> UITextField {
+        configureDatePicker()
+        
+        self.datePicker.addTarget(self.helper, action: #selector(self.helper.dateValueChanged), for: .valueChanged)
+        self.txtField.placeholder = placeholder
+        self.txtField.inputView = datePicker
+        self.txtField.textColor = UIColor(named: "2096F3_blue")
+        self.txtField.isUserInteractionEnabled = true
+
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+        let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        let doneButton = UIBarButtonItem(title: "Done", style: .plain, target: self.helper, action: #selector(self.helper.donButtonAction))
+        toolbar.setItems([flexibleSpace, doneButton], animated: true)
+        self.txtField.inputAccessoryView = toolbar
+
+        self.helper.dateChanged = {
+            self.date = self.datePicker.date
+        }
+
+        self.helper.donButtontap = {
+            if self.date == nil {
+                self.date = self.datePicker.date
+            }
+            self.txtField.resignFirstResponder()
+        }
+        return self.txtField
+    }
+
+    func updateUIView(_ uiView: UITextField, context: Context) {
+        if isActive {
+            uiView.text = dateFormatter.string(from: Date())
+        }
+        
+        if let selectedDate = date {
+            uiView.text = dateFormatter.string(from: selectedDate)
+        }
+        
+        configureDatePicker()
+    }
+
+    private func configureDatePicker() {
+        self.datePicker.datePickerMode = .date
+        self.datePicker.preferredDatePickerStyle = .wheels
+        
+        // Set maximum date
+        if let setMaxDate = setMaxDate {
+            datePicker.maximumDate = setMaxDate
+        } else if isMaxDateToday {
+            datePicker.maximumDate = Date()
+        } else {
+            datePicker.maximumDate = nil
+        }
+
+        // Set minimum date
+        if let setMinDate = setMinDate {
+            datePicker.minimumDate = setMinDate
+        } else if isMinDateToday {
+            datePicker.minimumDate = Date()
+        } else {
+            datePicker.minimumDate = nil
+        }
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+    
+    class Coordinator {}
+
+    class Helper {
+        public var dateChanged: (() -> Void)?
+        public var donButtontap: (() -> Void)?
+        
+        @objc func dateValueChanged() {
+            self.dateChanged?()
+        }
+        
+        @objc func donButtonAction() {
+            self.donButtontap?()
+        }
+    }
+}
